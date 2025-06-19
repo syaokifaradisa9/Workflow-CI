@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from dotenv import load_dotenv
-import dagshub.auth
 
 def train_model(train_data, test_data, target_name, rf_params):
     # Membuat Folder untuk artifact
@@ -24,6 +23,8 @@ def train_model(train_data, test_data, target_name, rf_params):
     y_test = test_data[target_name]
 
     with mlflow.start_run():
+        mlflow.autolog()
+        
         # Pembuatan Objek Random Forest
         model = RandomForestClassifier(
             n_estimators=rf_params['n_estimators'],
@@ -33,48 +34,16 @@ def train_model(train_data, test_data, target_name, rf_params):
         )
 
         model.fit(x_train, y_train)
-        dump(model, "artifact/model.pkl")
         
         mlflow.sklearn.log_model(
             sk_model=model,
-            input_example=x_train[0:5],
+            input_example=x_train[0:5], 
             registered_model_name=None,
             artifact_path="model",
         )
 
-        # Log Important Model
-        feature_importances = pd.DataFrame({
-            'feature': x_train.columns,
-            'importance': model.feature_importances_
-        }).sort_values('importance', ascending=False)
-
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x='importance', y='feature', data=feature_importances.head(10))
-        plt.title('Top 10 Feature Importances')
-        plt.tight_layout()
-        plt.savefig("artifact/feature_importances.png")
-        plt.close()
-
-        # Evaluate the model on the test set and log accuracy
-        y_pred_train = model.predict(x_train)
-        y_pred_test = model.predict(x_test)
-
-        # Buat dan simpan ROC Curve
-        fig, ax = plt.subplots(figsize=(8, 6))
-        RocCurveDisplay.from_estimator(model, x_test, y_test, ax=ax)
-        plt.title("ROC Curve")
-        plt.savefig("artifact/roc_curve.png")
-        plt.close(fig)
-
-        # Log COnfusion Matrix
-        cm = confusion_matrix(y_test, y_pred_test)
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
-        fig, ax = plt.subplots(figsize=(8, 6))
-        disp.plot(cmap=plt.cm.Blues, ax=ax)
-        plt.title("Confusion Matrix")
-        plt.savefig("artifact/confusion_matrix.png")
-        plt.close(fig)
-        
+        accuracy_train = model.score(x_train, y_train)
+        accuracy_test = model.score(x_test, y_test)
 
 if __name__ == "__main__":
     load_dotenv()

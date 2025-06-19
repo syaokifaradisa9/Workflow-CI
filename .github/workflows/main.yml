@@ -28,6 +28,17 @@ jobs:
           RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
+
+      - name: Commit and Push MLflow Artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add artifact/ 
+          git commit -m "CI: Add latest MLflow artifacts for run ${{ env.RUN_ID }}" || true
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker Model
         run: |
           mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "aids_prediction"
