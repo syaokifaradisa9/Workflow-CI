@@ -36,7 +36,7 @@ def train_model(train_data, test_data, target_name, rf_params):
         dump(model, "artifact/model.pkl")
         
         mlflow.sklearn.log_model(
-            sk_model=rf,
+            sk_model=model,
             input_example=x_train[0:5],
             registered_model_name=None,
             artifact_path="model",
