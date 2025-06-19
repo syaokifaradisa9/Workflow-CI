@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Modelling.py
         run: |
-          python modelling.py
+          python MLProject/modelling.py
 
       - name: Get latest MLflow run_id
         id: get_run_id
