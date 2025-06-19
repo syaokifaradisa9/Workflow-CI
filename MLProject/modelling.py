@@ -81,9 +81,6 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    mlflow.set_experiment("AIDS Model")
-
     # Define Variable
     train_path = sys.argv[5] if len(sys.argv) > 5 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "aids_preprocessing/train.csv")
     test_path  = sys.argv[6] if len(sys.argv) > 6 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "aids_preprocessing/test.csv")
