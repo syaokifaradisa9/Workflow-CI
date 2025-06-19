@@ -37,18 +37,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn scikit-optimize python-dotenv dagshub
 
-      - name: Create MLproject (if not exists)
+      - name: DagsHub CLI Login
         run: |
-          if [ ! -f MLproject ]; then
-            echo "name: AIDS_Detection" > MLproject
-            echo "entry_points:" >> MLproject
-            echo "  main:" >> MLproject
-            echo "    command: \"python MLProject/modelling.py\"" >> MLproject
-          fi
+          # Pastikan dagshub CLI terinstal sebagai bagian dari dependencies
+          dagshub login --token ${{ secrets.DAGSHUB_TOKEN }}
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
       - name: Run MLflow Project
         run: |
-          python MLProject/modelling.py
+          mlflow run . --env-manager=local
 
       - name: Get latest MLflow run_id
         id: get_run_id
