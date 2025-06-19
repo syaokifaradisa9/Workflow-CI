@@ -44,9 +44,9 @@ jobs:
         env:
           DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
-      - name: Run MLflow Project
+      - name: Run Modelling.py
         run: |
-          mlflow run . --env-manager=local
+          python modelling.py
 
       - name: Get latest MLflow run_id
         id: get_run_id

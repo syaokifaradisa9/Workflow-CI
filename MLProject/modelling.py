@@ -79,7 +79,6 @@ if __name__ == "__main__":
     np.random.seed(40)
 
     dagshub.init(repo_owner=os.getenv("DAGSHUB_REPO_OWNER"), repo_name=os.getenv("DAGSHUB_REPO_NAME"), mlflow=True)
-    dagshub.auth.add_app_token(os.getenv("DAGSHUB_TOKEN"))
     mlflow.set_tracking_uri(uri=os.getenv("MLFLOW_TRACKING_URI"))
     mlflow.set_experiment("AIDS Model")
 
