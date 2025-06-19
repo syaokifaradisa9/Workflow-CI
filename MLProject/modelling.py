@@ -10,7 +10,6 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from dotenv import load_dotenv
 
 def train_model(train_data, test_data, target_name, rf_params):
     # Membuat Folder untuk artifact
@@ -76,7 +75,6 @@ def train_model(train_data, test_data, target_name, rf_params):
         
 
 if __name__ == "__main__":
-    load_dotenv()
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 

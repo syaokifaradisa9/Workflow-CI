@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn python-dotenv dagshub
+          pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn
       - name: Run mlflow project
         run: |
           mlflow run MLProject --env-manager=local
