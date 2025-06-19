@@ -42,7 +42,7 @@ jobs:
             echo "name: AIDS_Detection" > MLproject
             echo "entry_points:" >> MLproject
             echo "  main:" >> MLproject
-            echo "    command: \"python modelling.py\"" >> MLproject
+            echo "    command: \"python MLProject/modelling.py\"" >> MLproject
           fi
 
       - name: Run MLflow Project
