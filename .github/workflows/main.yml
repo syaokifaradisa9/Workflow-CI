@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn python-dotenv dagshub
       - name: Run mlflow project
         run: |
-          mlflow run . --env-manager=local
+          mlflow run MLProject --env-manager=local
       - name: Get latest MLflow run_id
         run: |
           RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
