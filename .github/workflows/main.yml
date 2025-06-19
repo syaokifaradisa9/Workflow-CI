@@ -47,11 +47,8 @@ jobs:
       - name: Run Modelling.py
         run: |
           python MLProject/modelling.py
-
-      - name: Get latest MLflow run_id
-        id: get_run_id
-        run: |
-          echo "Latest MLflow run_id: ${{ env.RUN_ID }}"
+          cat_output=$(python MLProject/modelling.py)
+          echo "$cat_output" | grep "MLFLOW_RUN_ID" >> $GITHUB_ENV
 
       - name: Upload MLflow artifacts
         uses: actions/upload-artifact@v4

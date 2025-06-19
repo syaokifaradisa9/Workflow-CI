@@ -26,8 +26,7 @@ def train_model(train_data, test_data, target_name, rf_params):
     with mlflow.start_run() as run:
         mlflow.autolog()
         run_id = run.info.run_id
-
-        os.environ["RUN_ID"] = run_id
+        print(f"MLFLOW_RUN_ID={run_id}")
 
         # Pembuatan Objek Random Forest
         model = RandomForestClassifier(
