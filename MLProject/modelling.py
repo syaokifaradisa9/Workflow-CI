@@ -4,14 +4,11 @@ import os
 import numpy as np
 import warnings
 import sys
-import dagshub
 import seaborn as sns
 from joblib import dump
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score, RocCurveDisplay
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from skopt import BayesSearchCV
+from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from dotenv import load_dotenv
 import dagshub.auth
@@ -26,8 +23,11 @@ def train_model(train_data, test_data, target_name, rf_params):
     x_test = test_data.drop(target_name, axis=1)
     y_test = test_data[target_name]
 
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
         mlflow.autolog()
+        run_id = run.info.run_id
+
+        os.environ["RUN_ID"] = run_id
 
         # Pembuatan Objek Random Forest
         model = RandomForestClassifier(
@@ -39,13 +39,6 @@ def train_model(train_data, test_data, target_name, rf_params):
 
         model.fit(x_train, y_train)
         dump(model, "artifact/model.pkl")
-        
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            input_example=x_train[0:5],
-            registered_model_name=None,
-            artifact_path="model",
-        )
 
         # Log Important Model
         feature_importances = pd.DataFrame({

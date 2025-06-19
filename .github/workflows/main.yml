@@ -51,14 +51,12 @@ jobs:
       - name: Get latest MLflow run_id
         id: get_run_id
         run: |
-          RUN_ID=$(mlflow runs list --experiment-name "AIDS Model" --max-results 1 --output-plus-latest --order-by "start_time DESC" | grep "RUN_ID" | awk '{print $2}')
-          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-          echo "Latest MLflow run_id: $RUN_ID"
+          echo "Latest MLflow run_id: ${{ env.RUN_ID }}"
 
       - name: Upload MLflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mlflow-artifacts-${{ steps.get_run_id.outputs.RUN_ID }}
+          name: mlflow-artifacts-${{ env.RUN_ID }}
           path: mlruns/0/${{ env.RUN_ID }}/artifacts/
 
       - name: Build Docker Model
