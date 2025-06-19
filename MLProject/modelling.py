@@ -39,6 +39,13 @@ def train_model(train_data, test_data, target_name, rf_params):
 
         model.fit(x_train, y_train)
         dump(model, "artifact/model.pkl")
+        
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            input_example=x_train[0:5],
+            registered_model_name=None,
+            artifact_path="model",
+        )
 
         # Log Important Model
         feature_importances = pd.DataFrame({
