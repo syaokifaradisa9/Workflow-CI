@@ -38,6 +38,13 @@ def train_model(train_data, test_data, target_name, rf_params):
 
         model.fit(x_train, y_train)
         dump(model, "artifact/model.pkl")
+        
+        mlflow.sklearn.log_model(
+            sk_model=rf,
+            input_example=x_train[0:5],
+            registered_model_name=None,
+            artifact_path="model",
+        )
 
         # Log Important Model
         feature_importances = pd.DataFrame({
@@ -71,14 +78,14 @@ def train_model(train_data, test_data, target_name, rf_params):
         plt.title("Confusion Matrix")
         plt.savefig("artifact/confusion_matrix.png")
         plt.close(fig)
+        
 
 if __name__ == "__main__":
     load_dotenv()
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 
-    dagshub.init(repo_owner=os.getenv("DAGSHUB_REPO_OWNER"), repo_name=os.getenv("DAGSHUB_REPO_NAME"), mlflow=True)
-    mlflow.set_tracking_uri(uri=os.getenv("MLFLOW_TRACKING_URI"))
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
     mlflow.set_experiment("AIDS Model")
 
     # Define Variable

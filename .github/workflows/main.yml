@@ -6,11 +6,6 @@ on:
   pull_request:
     branches:
       - main
-env:
-  MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-  DAGSHUB_REPO_OWNER: ${{ secrets.DAGSHUB_REPO_OWNER }}
-  DAGSHUB_REPO_NAME: ${{ secrets.DAGSHUB_REPO_NAME }}
-  DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
 jobs:
   build:
@@ -37,12 +32,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn scikit-optimize python-dotenv dagshub
 
-      - name: DagsHub CLI Login
+      - name: Run mlflow server
         run: |
-          # Pastikan dagshub CLI terinstal sebagai bagian dari dependencies
-          dagshub login --token ${{ secrets.DAGSHUB_TOKEN }}
-        env:
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          mlflow ui --host 0.0.0.0
 
       - name: Run Modelling.py
         run: |
