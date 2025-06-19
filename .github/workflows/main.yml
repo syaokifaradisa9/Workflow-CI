@@ -1,0 +1,95 @@
+name: CI/CD MLflow
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+  DAGSHUB_REPO_OWNER: ${{ secrets.DAGSHUB_REPO_OWNER }}
+  DAGSHUB_REPO_NAME: ${{ secrets.DAGSHUB_REPO_NAME }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.7"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install mlflow pandas scikit-learn joblib matplotlib seaborn scikit-optimize python-dotenv dagshub
+
+      - name: Create MLproject (if not exists)
+        run: |
+          if [ ! -f MLproject ]; then
+            echo "name: AIDS_Detection" > MLproject
+            echo "entry_points:" >> MLproject
+            echo "  main:" >> MLproject
+            echo "    command: \"python modelling.py\"" >> MLproject
+          fi
+
+      - name: Run MLflow Project
+        run: |
+          mlflow run . --env-manager=local
+
+      - name: Get latest MLflow run_id
+        id: get_run_id
+        run: |
+          RUN_ID=$(mlflow runs list --experiment-name "AIDS Model" --max-results 1 --output-plus-latest --order-by "start_time DESC" | grep "RUN_ID" | awk '{print $2}')
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Latest MLflow run_id: $RUN_ID"
+
+      - name: Upload MLflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-artifacts-${{ steps.get_run_id.outputs.RUN_ID }}
+          path: mlruns/0/${{ env.RUN_ID }}/artifacts/
+
+      - name: Build Docker Model
+        run: |
+          mlflow models build-docker --model-uri "runs:/${{ env.RUN_ID }}/model" --name "aids_detection" -t aids_detection_image:latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Tag and Push Docker Image
+        run: |
+          docker tag aids_detection_image:latest ${{ secrets.DOCKER_HUB_USERNAME }}/aids_detection:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/aids_detection:latest
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Copy artifacts to a designated folder for commit
+        run: |
+          mkdir -p artifacts
+          cp -r artifact/* artifacts/
+
+      - name: Commit and Push artifacts
+        run: |
+          git add artifacts/
+          git status
+          git commit -m "CI: Add latest model artifacts [skip ci]" || echo "No changes to commit"
+          git push

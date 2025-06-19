@@ -1,0 +1,14 @@
+name: aids-detection
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      n_estimators: {type: int, default: 300}
+      max_depth: {type: int, default: 15}
+      min_samples_split: {type: int, default: 5}
+      min_samples_leaf: {type: int, default: 1}
+      train_path : {type: string, default: "aids_preprocessing/train.csv"}
+      test_path : {type: string, default: "aids_preprocessing/test.csv"}
+    command: "python modelling.py {n_estimators} {max_depth} {min_samples_split} {min_samples_leaf} {train_path} {test_path}"
