@@ -23,11 +23,7 @@ def train_model(train_data, test_data, target_name, rf_params):
     x_test = test_data.drop(target_name, axis=1)
     y_test = test_data[target_name]
 
-    with mlflow.start_run() as run:
-        mlflow.autolog()
-        run_id = run.info.run_id
-        print(f"MLFLOW_RUN_ID={run_id}")
-
+    with mlflow.start_run():
         # Pembuatan Objek Random Forest
         model = RandomForestClassifier(
             n_estimators=rf_params['n_estimators'],
